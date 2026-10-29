@@ -1,0 +1,33 @@
+{
+  "model_name": "Random Forest Regressor",
+  "project": "SmartEnergy AI",
+  "target": "mean_power_kw",
+  "target_unit": "kW",
+  "features": [
+    "hour",
+    "day_of_week",
+    "day",
+    "month",
+    "year",
+    "is_weekend",
+    "lag_1h",
+    "lag_24h",
+    "lag_168h",
+    "rolling_mean_24h",
+    "rolling_mean_168h"
+  ],
+  "n_estimators": 200,
+  "random_state": 42,
+  "training_rows": 16202,
+  "validation_rows": 3472,
+  "selection_basis": "Lowest validation MAE among the compared models",
+  "validation_mae_kw": 0.390433,
+  "validation_rmse_kw": 0.548268,
+  "validation_r2": 0.603399,
+  "test_evaluated": true,
+  "test_used_for_model_selection": false,
+  "test_rows": 3472,
+  "test_mae_kw": 0.32826586914362516,
+  "test_rmse_kw": 0.47396366644456817,
+  "test_r2": 0.5695585372491947
+}

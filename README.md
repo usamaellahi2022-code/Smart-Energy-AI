@@ -2,7 +2,7 @@
 
 ## Overview
 
-SmartEnergy AI is a machine-learning research project for hourly household electricity consumption forecasting and potential anomaly detection. It uses a Random Forest regression model and an interactive Streamlit dashboard.
+SmartEnergy AI is a machine-learning research and portfolio project for hourly household electricity consumption forecasting and potential anomaly detection. It uses a Random Forest regression model and an interactive Streamlit dashboard.
 
 **Important:** Potential anomalies are unusual prediction errors, not confirmed electrical faults.
 
@@ -10,41 +10,54 @@ SmartEnergy AI is a machine-learning research project for hourly household elect
 
 - Analyze household electricity consumption.
 - Forecast hourly active power consumption.
-- Compare predictions with a persistence baseline.
+- Compare model predictions with a persistence baseline.
 - Identify potentially unusual observations.
+- Present results through an interactive dashboard.
 
 ## Dataset
 
-The project uses the UCI Individual Household Electric Power Consumption dataset.
+This project uses the UCI Individual Household Electric Power Consumption dataset.
 
 Source: https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption
 
-The target variable is `mean_power_kw`, measured in kW.
-
-
+The prediction target is `mean_power_kw`, measured in kilowatts (kW). The dataset represents one household, so results may not generalize to other households.
 
 ## Methodology
 
 ### Feature Engineering
-The model uses 11 time-based and historical consumption features, including lags of 1, 24, and 168 hours and rolling means over 24 and 168 hours.
 
-### Machine-Learning Model
-A Random Forest regressor estimates hourly active power consumption and is compared with a persistence baseline.
+The model uses 11 time-based and historical consumption features:
+
+- `hour`, `day_of_week`, `day`, `month`, `year`
+- `is_weekend`
+- `lag_1h`, `lag_24h`, `lag_168h`
+- `rolling_mean_24h`, `rolling_mean_168h`
+
+### Forecasting Model
+
+A Random Forest Regressor with 200 trees was selected based on validation performance. Its results were compared with a persistence baseline.
 
 ### Anomaly Detection
-The threshold is calibrated using the 95th percentile of validation absolute prediction errors. Flagged observations require further investigation.
+
+The anomaly threshold was calibrated using the 95th percentile of absolute prediction errors on the validation data. Observations exceeding the threshold are flagged for further investigation; these flags do not establish equipment failure.
 
 ## Evaluation Results
 
-| Metric | Random Forest | Persistence Baseline |
+Final evaluation on the held-out test split:
+
+| Metric | Random Forest | Persistence baseline |
 |---|---:|---:|
 | MAE | 0.3283 kW | 0.3914 kW |
 | RMSE | 0.4740 kW | 0.5913 kW |
 | R² | 0.5696 | 0.3301 |
 
-On the evaluated test split, the Random Forest achieved approximately 16.13% lower MAE and 19.84% lower RMSE than the baseline.
+Compared with the persistence baseline, the Random Forest achieved approximately 16.13% lower MAE and 19.84% lower RMSE on this test split.
+
+The held-out test set was used for final evaluation, not model selection.
 
 ## Anomaly Results
+
+On the test split:
 
 - Test observations: 3,472
 - Potential anomalies: 100 (approximately 2.88%)
@@ -54,7 +67,17 @@ On the evaluated test split, the Random Forest achieved approximately 16.13% low
 - Groups with at least two observations: 10
 - Longest consecutive group: 3 hours
 
-Anomaly flags are statistical signals, not confirmed electrical faults.
+These are statistical signals based on prediction errors, not confirmed electrical faults.
+
+## Dashboard Features
+
+The Streamlit dashboard includes:
+
+1. Energy overview
+2. Historical electricity consumption
+3. Saved model estimates
+4. Potential anomaly explorer
+5. Consecutive anomaly groups
 
 ## Project Structure
 
@@ -62,6 +85,8 @@ Anomaly flags are statistical signals, not confirmed electrical faults.
 rebuild/
 ├── app.py
 ├── README.md
+├── requirements.txt
+├── .gitignore
 ├── data/
 ├── recovery/
 │   ├── models/
@@ -69,70 +94,46 @@ rebuild/
 └── logs/
 ```
 
-## Requirements
+Large datasets, the trained model binary, and generated results are excluded from GitHub to keep the repository lightweight.
 
-Main dependencies: Python, pandas, joblib, matplotlib, scikit-learn, and Streamlit.
+## Installation
 
-Install them using:
+Use Python 3.10 or a compatible version, then install the dependencies from the project directory:
+
 ```bash
-pip install pandas joblib matplotlib scikit-learn streamlit
+pip install -r requirements.txt
 ```
 
 ## Run the Dashboard
 
 From the directory containing `app.py`, run:
+
 ```bash
 streamlit run app.py
 ```
-Ensure the model, dataset, and anomaly result files are available at the paths configured in the application.
 
-## Limitations
+A fresh clone does not include the required data and model artifacts. The dashboard requires the processed feature dataset, trained Random Forest model, test anomaly results, and consecutive anomaly-group results. Obtain these from an authorized backup or regenerate them using the project workflow before running the dashboard.
+
+## Limitations and Responsible Use
 
 - The dataset represents a particular household.
-- Results may not generalize to other households.
-- Prediction errors may increase during unusual periods.
+- Results may not generalize to other households or environments.
+- Forecast errors may increase during unusual periods.
 - Anomaly flags do not prove equipment failure.
 - The threshold requires further validation.
-- This is a research demonstration, not a certified safety system.
+- This is a research demonstration, not a certified electrical safety system.
+- Protect household consumption data when sharing or deploying the project.
+
+Investigate anomaly flags alongside other evidence before making operational decisions.
 
 ## Future Improvements
 
 - Compare additional forecasting models.
 - Evaluate performance across seasons.
-- Add automated tests and reproducible dependencies.
-- Validate anomalies with expert-reviewed events.
+- Add automated tests and strengthen reproducibility.
+- Validate anomalies using expert-reviewed events.
 - Deploy the dashboard securely.
-
-## Responsible Use
-
-Protect household consumption data when sharing this project. Investigate anomaly flags alongside other evidence before making operational decisions.
 
 ## Author
 
 Developed as an AI and Data Science portfolio research project.
-
-## Reproducing the Dashboard
-
-Install the dependencies listed in `requirements.txt`:
-
-    pip install -r requirements.txt
-
-Start the dashboard from the project directory:
-
-    streamlit run app.py
-
-## Required Project Artifacts
-
-Large datasets, the trained model, and generated results are
-excluded from GitHub by the `.gitignore` rules.
-Cloning the repository will not download these files.
-
-The dashboard requires the feature dataset, trained Random Forest
-model, test anomaly results, and consecutive anomaly-group results.
-Obtain them from an authorized backup or regenerate them before
-running the dashboard.
-
-## Reproducibility Note
-
-Results may differ if the data, preprocessing, package versions,
-or model configuration changes.
